@@ -1,92 +1,117 @@
-"use client"
+"use client";
 
-import { useEffect, useState } from "react"
-import { useSearchParams } from "next/navigation"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import type { Feedback } from "@/lib/types"
-import { getAllFeedbacks } from "@/lib/firebase-service"
-import { formatDate } from "@/lib/utils"
-import { StarRating } from "@/components/feedback/star-rating"
-import { FeedbackDetail } from "@/components/feedback/feedback-detail"
-import { Search } from "lucide-react"
+import { useEffect, useState } from "react";
+import { useSearchParams } from "next/navigation";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import type { Feedback } from "@/lib/types";
+import { getAllFeedbacks } from "@/lib/firebase-service";
+import { formatDate } from "@/lib/utils";
+import { StarRating } from "@/components/feedback/star-rating";
+import { FeedbackDetail } from "@/components/feedback/feedback-detail";
+import { Search } from "lucide-react";
 
 export function FeedbackList() {
-  const searchParams = useSearchParams()
-  const selectedId = searchParams.get("id")
+  const searchParams = useSearchParams();
+  const selectedId = searchParams.get("id");
 
-  const [feedbacks, setFeedbacks] = useState<Feedback[]>([])
-  const [filteredFeedbacks, setFilteredFeedbacks] = useState<Feedback[]>([])
-  const [loading, setLoading] = useState(true)
-  const [searchTerm, setSearchTerm] = useState("")
-  const [statusFilter, setStatusFilter] = useState("all")
-  const [ratingFilter, setRatingFilter] = useState("all")
+  const [feedbacks, setFeedbacks] = useState<Feedback[]>([]);
+  const [filteredFeedbacks, setFilteredFeedbacks] = useState<Feedback[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [statusFilter, setStatusFilter] = useState("all");
+  const [ratingFilter, setRatingFilter] = useState("all");
 
   useEffect(() => {
     const loadFeedbacks = async () => {
       try {
-        const data = await getAllFeedbacks()
-        setFeedbacks(data)
-        setFilteredFeedbacks(data)
+        const data = await getAllFeedbacks();
+        setFeedbacks(data);
+        setFilteredFeedbacks(data);
       } catch (error) {
-        console.error("Error loading feedbacks:", error)
+        console.error("Error loading feedbacks:", error);
       } finally {
-        setLoading(false)
+        setLoading(false);
       }
-    }
+    };
 
-    loadFeedbacks()
-  }, [])
+    loadFeedbacks();
+  }, []);
 
   useEffect(() => {
-    let result = [...feedbacks]
+    let result = [...feedbacks];
 
     // Apply search filter
     if (searchTerm) {
-      const term = searchTerm.toLowerCase()
+      const term = searchTerm.toLowerCase();
       result = result.filter(
         (feedback) =>
-          feedback.userName.toLowerCase().includes(term) ||
+          feedback.userName?.toLowerCase().includes(term) ||
+          false ||
           feedback.comment.toLowerCase().includes(term) ||
-          feedback.category.toLowerCase().includes(term),
-      )
+          feedback.category.toLowerCase().includes(term)
+      );
     }
 
     // Apply status filter
     if (statusFilter !== "all") {
-      result = result.filter((feedback) => feedback.status === statusFilter)
+      result = result.filter((feedback) => feedback.status === statusFilter);
     }
 
     // Apply rating filter
     if (ratingFilter !== "all") {
-      result = result.filter((feedback) => feedback.rating === Number.parseInt(ratingFilter))
+      result = result.filter(
+        (feedback) => feedback.rating === Number.parseInt(ratingFilter)
+      );
     }
 
-    setFilteredFeedbacks(result)
-  }, [feedbacks, searchTerm, statusFilter, ratingFilter])
+    setFilteredFeedbacks(result);
+  }, [feedbacks, searchTerm, statusFilter, ratingFilter]);
 
   if (selectedId) {
-    return <FeedbackDetail id={selectedId} onBack={() => window.history.back()} />
+    return (
+      <FeedbackDetail id={selectedId} onBack={() => window.history.back()} />
+    );
   }
 
   if (loading) {
-    return <div className="flex items-center justify-center h-64 md:ml-64">Loading...</div>
+    return (
+      <div className="flex items-center justify-center h-64 md:ml-64">
+        Loading...
+      </div>
+    );
   }
 
   return (
     <div className="space-y-6 md:ml-64">
       <div className="flex flex-col gap-4">
         <h1 className="text-3xl font-bold">Feedbacks</h1>
-        <p className="text-muted-foreground">Manage and respond to user feedback</p>
+        <p className="text-muted-foreground">
+          Manage and respond to user feedback
+        </p>
       </div>
 
       <Card>
         <CardHeader>
           <CardTitle>All Feedbacks</CardTitle>
-          <CardDescription>View and manage all feedback submissions</CardDescription>
+          <CardDescription>
+            View and manage all feedback submissions
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <div className="flex flex-col gap-4 mb-6 md:flex-row">
@@ -128,7 +153,9 @@ export function FeedbackList() {
           </div>
 
           {filteredFeedbacks.length === 0 ? (
-            <div className="text-center py-8 text-muted-foreground">No feedbacks found matching your filters</div>
+            <div className="text-center py-8 text-muted-foreground">
+              No feedbacks found matching your filters
+            </div>
           ) : (
             <div className="space-y-4">
               {filteredFeedbacks.map((feedback) => (
@@ -136,7 +163,9 @@ export function FeedbackList() {
                   <div className="flex justify-between items-start mb-2">
                     <div>
                       <h4 className="font-medium">{feedback.userName}</h4>
-                      <p className="text-sm text-muted-foreground">{formatDate(feedback.createdAt)}</p>
+                      <p className="text-sm text-muted-foreground">
+                        {formatDate(feedback.createdAt)}
+                      </p>
                     </div>
                     <div className="flex items-center gap-2">
                       <StarRating rating={feedback.rating} />
@@ -145,8 +174,8 @@ export function FeedbackList() {
                           feedback.status === "pending"
                             ? "outline"
                             : feedback.status === "responded"
-                              ? "default"
-                              : "secondary"
+                            ? "default"
+                            : "secondary"
                         }
                       >
                         {feedback.status}
@@ -169,7 +198,9 @@ export function FeedbackList() {
                     <Button
                       variant="outline"
                       size="sm"
-                      onClick={() => (window.location.href = `/dashboard/feedbacks?id=${feedback.id}`)}
+                      onClick={() =>
+                        (window.location.href = `/dashboard/feedbacks?id=${feedback.id}`)
+                      }
                     >
                       View Details
                     </Button>
@@ -181,5 +212,5 @@ export function FeedbackList() {
         </CardContent>
       </Card>
     </div>
-  )
+  );
 }
